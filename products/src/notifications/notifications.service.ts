@@ -21,6 +21,11 @@ export class NotificationsService {
     });
   }
 
+  /**
+   * Publishes a product event to the SQS queue.
+   *
+   * @param event - Product event payload to publish
+   */
   async publish(event: ProductEventPayload) {
     const command = new SendMessageCommand({
       QueueUrl: this.queueUrl,

@@ -35,14 +35,24 @@ export class SqsListenerService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  /**
+   * Starts the SQS polling loop when the module is initialized.
+   */
   onModuleInit() {
     this.loop();
   }
 
+  /**
+   * Stops the SQS polling loop when the module is destroyed.
+   */
   onModuleDestroy() {
     this.polling = false;
   }
 
+  /**
+   * Main polling loop that continuously polls SQS for messages.
+   * Handles errors with exponential backoff (2 seconds delay).
+   */
   private async loop() {
     while (this.polling) {
       try {
@@ -54,6 +64,10 @@ export class SqsListenerService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Polls SQS queue once for new messages.
+   * Processes received messages and deletes them from the queue.
+   */
   private async pollOnce() {
     const command = new ReceiveMessageCommand({
       QueueUrl: this.config.queueUrl,
@@ -80,6 +94,11 @@ export class SqsListenerService implements OnModuleInit, OnModuleDestroy {
     await this.deleteBatch(messages);
   }
 
+  /**
+   * Deletes a batch of processed messages from the SQS queue.
+   *
+   * @param messages - Array of SQS messages to delete
+   */
   private async deleteBatch(messages: Message[]) {
     const entries = messages.map((m) => ({
       Id: m.MessageId || `${Date.now()}`,
@@ -96,6 +115,13 @@ export class SqsListenerService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  /**
+   * Parses a message body string into a ProductEventPayload.
+   * Validates that the payload has required fields (type and productId).
+   *
+   * @param body - Raw message body string from SQS
+   * @returns Parsed event payload or null if parsing/validation fails
+   */
   private parseMessage(body?: string): ProductEventPayload | null {
     if (!body) return null;
     try {

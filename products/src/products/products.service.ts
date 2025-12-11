@@ -15,6 +15,13 @@ export class ProductsService {
     private readonly metrics: MetricsService,
   ) {}
 
+  /**
+   * Creates a new product in the database.
+   * Increments the products created metric and publishes a PRODUCT_CREATED event.
+   *
+   * @param dto - Product creation data (name and price)
+   * @returns The created product with generated ID and timestamp
+   */
   async create(dto: CreateProductDto): Promise<Product> {
     const result = await this.pool.query<Product>(
       `INSERT INTO products (name, price) VALUES ($1, $2) RETURNING id, name, price, created_at`,
@@ -31,6 +38,13 @@ export class ProductsService {
     return product;
   }
 
+  /**
+   * Deletes a product by ID.
+   * Increments the products deleted metric and publishes a PRODUCT_DELETED event.
+   *
+   * @param id - Product ID to delete
+   * @throws NotFoundException if product with given ID doesn't exist
+   */
   async delete(id: number): Promise<void> {
     const result = await this.pool.query(
       `DELETE FROM products WHERE id = $1 RETURNING id`,
@@ -47,6 +61,13 @@ export class ProductsService {
     });
   }
 
+  /**
+   * Retrieves a paginated list of products.
+   * Products are ordered by ID in descending order (newest first).
+   *
+   * @param query - Pagination parameters (page and limit)
+   * @returns Paginated products list with total count
+   */
   async list(query: PaginationQueryDto): Promise<PaginatedProducts> {
     const limit = query.limit ?? 10;
     const page = query.page ?? 1;

@@ -18,11 +18,21 @@ export class MetricsService {
     });
   }
 
+  /**
+   * Exports Prometheus metrics in the standard format.
+   *
+   * @param res - Express response object to write metrics to
+   */
   async exportMetrics(res: Response) {
     res.setHeader('Content-Type', this.register.contentType);
     res.end(await this.register.metrics());
   }
 
+  /**
+   * Gets the Prometheus metrics registry.
+   *
+   * @returns Prometheus Registry instance
+   */
   getMetrics() {
     return this.register;
   }
